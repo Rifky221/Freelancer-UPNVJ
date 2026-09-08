@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freelance UPNVJ — Dashboard Seller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Mulish:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#5c6e4f;
+    --sage-dark:#3f4a35;
+    --moss:#2f3626;
+    --cream:#f2eedd;
+    --cream-2:#e6e0c6;
+    --butter:#e3b23c;
+    --coral:#dd6b55;
+    --coral-dark:#c65138;
+    --ink:#23281c;
+    --paper:#fbf9f1;
+    --muted:#6b7359;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Mulish',sans-serif; color:var(--ink); background:var(--paper);}
+  h1,h2,h3,.brand,.tabbtn,.stat b{font-family:'Baloo 2',sans-serif;}
+  h2{font-size:1.5rem; font-weight:700; margin:0 0 4px;}
+  h3{font-size:1.05rem; font-weight:700; margin:0;}
+  p{margin:0;}
+  :focus-visible{outline:3px solid var(--butter); outline-offset:2px;}
+  button, input, textarea, select{font-family:'Mulish',sans-serif;}
+
+  .app{display:grid; grid-template-columns:250px 1fr; min-height:100vh;}
+
+  /* ---- sidebar ---- */
+  .sidebar{background:var(--sage-dark); color:var(--cream); padding:26px 18px; display:flex; flex-direction:column;}
+  .brand{color:#f4efd9; font-size:1.15rem; font-weight:700; display:flex; align-items:center; gap:8px; padding:0 8px 26px;}
+  .brand span.dot{width:9px; height:9px; border-radius:50%; background:var(--coral); display:inline-block;}
+  .nav-item{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; margin-bottom:4px;
+    color:#d7dbc4; font-weight:600; font-size:0.93rem; cursor:pointer; border:none; background:none; text-align:left; width:100%;
+  }
+  .nav-item:hover{background:rgba(255,255,255,0.06);}
+  .nav-item.active{background:var(--coral); color:#fff;}
+  .nav-item .ic{font-size:1.05rem; width:20px; text-align:center;}
+  .sidebar-foot{margin-top:auto; padding:14px; background:rgba(255,255,255,0.06); border-radius:14px; font-size:0.82rem; color:#c6cbb0;}
+  .sidebar-foot b{color:#f4efd9; display:block; margin-bottom:2px;}
+  .sidebar-close{display:none;}
+
+  /* ---- hamburger + overlay (mobile) ---- */
+  .hamburger{
+    display:none; background:none; border:none; font-size:1.5rem; line-height:1; cursor:pointer;
+    color:var(--sage-dark); padding:6px 8px; border-radius:10px; flex:none;
+  }
+  .hamburger:hover{background:var(--cream);}
+  .sidebar-overlay{
+    display:none; position:fixed; inset:0; background:rgba(20,20,10,0.45); z-index:90;
+    opacity:0; transition:opacity .2s;
+  }
+  .sidebar-overlay.show{display:block; opacity:1;}
+
+  /* ---- topbar ---- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; padding:18px 32px; gap:12px;
+    border-bottom:2px solid var(--cream-2); background:var(--paper); position:sticky; top:0; z-index:5;
+  }
+  .topbar .title-wrap{display:flex; align-items:center; gap:10px; min-width:0;}
+  .topbar .who{display:flex; align-items:center; gap:10px;}
+  .avatar{
+    width:38px; height:38px; border-radius:50%; background:var(--coral); color:#fff; font-weight:800;
+    display:flex; align-items:center; justify-content:center; font-family:'Baloo 2'; flex:none;
+  }
+  .topbar .who small{color:var(--muted); display:block;}
+  .badge-pill{
+    display:inline-flex; align-items:center; gap:6px; background:var(--cream); border-radius:999px; padding:6px 12px;
+    font-size:0.8rem; font-weight:700; color:var(--sage-dark);
+  }
+  .badge-pill.verified{background:#e4f0da; color:#3b6b2b;}
+  .badge-pill.pending{background:#f6e6cf; color:#93601a;}
+
+  main{padding:30px 32px 60px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .btn{
+    font-family:'Baloo 2',sans-serif; font-weight:600; border:none; border-radius:999px; cursor:pointer;
+    padding:10px 20px; font-size:0.92rem; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{background:var(--coral); color:#fff; box-shadow:0 5px 0 var(--coral-dark);}
+  .btn-primary:active{transform:translateY(2px); box-shadow:0 3px 0 var(--coral-dark);}
+  .btn-outline{background:#fff; border:2px solid var(--cream-2); color:var(--sage-dark);}
+  .btn-sm{padding:7px 14px; font-size:0.82rem;}
+  .btn-danger-ghost{background:none; border:none; color:var(--coral-dark); font-weight:700; font-size:0.82rem; cursor:pointer;}
+
+  /* ---- dashboard stats ---- */
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin:24px 0 34px;}
+  .stat{background:#fff; border:2px solid var(--cream-2); border-radius:var(--radius); padding:20px;}
+  .stat .ic{font-size:1.4rem;}
+  .stat b{display:block; font-size:1.5rem; margin-top:8px;}
+  .stat span{font-size:0.83rem; color:var(--muted);}
+
+  .card{background:#fff; border:2px solid var(--cream-2); border-radius:var(--radius); padding:24px; margin-bottom:22px;}
+  .card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+
+  .progress-row{display:flex; align-items:center; gap:14px; margin-top:10px;}
+  .progress-track{flex:1; height:10px; background:var(--cream); border-radius:999px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--sage); border-radius:999px; transition:width .3s;}
+
+  .todo-list{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  .todo-list li{display:flex; align-items:center; gap:10px; font-size:0.9rem; color:var(--sage-dark);}
+  .todo-list li.done{color:var(--muted); text-decoration:line-through;}
+  .todo-list li .chk{width:20px; height:20px; border-radius:50%; background:var(--cream-2); display:flex; align-items:center; justify-content:center; font-size:0.7rem; flex:none;}
+  .todo-list li.done .chk{background:var(--sage); color:#fff;}
+
+  /* ---- forms ---- */
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:0.85rem; font-weight:700; color:var(--sage-dark);}
+  .field input, .field select, .field textarea{
+    border:2px solid var(--cream-2); border-radius:12px; padding:10px 13px; font-size:0.92rem; background:var(--paper);
+  }
+  .field textarea{resize:vertical; min-height:80px;}
+  .hint{font-size:0.78rem; color:var(--muted);}
+  .skills-input{display:flex; flex-wrap:wrap; gap:8px; border:2px solid var(--cream-2); border-radius:12px; padding:10px; background:var(--paper);}
+  .skill-chip{background:var(--cream); border-radius:999px; padding:5px 10px 5px 12px; font-size:0.82rem; display:flex; align-items:center; gap:6px; font-weight:700; color:var(--sage-dark);}
+  .skill-chip button{background:none; border:none; cursor:pointer; color:var(--coral-dark); font-weight:800;}
+  .skills-input input{border:none; flex:1; min-width:120px; padding:6px; background:transparent;}
+  .skills-input input:focus{outline:none;}
+
+  .toast{
+    position:fixed; bottom:26px; right:26px; background:var(--sage-dark); color:#fff; padding:14px 22px; border-radius:14px;
+    font-weight:700; font-family:'Baloo 2'; box-shadow:0 8px 24px rgba(0,0,0,0.2); opacity:0; transform:translateY(10px);
+    transition:opacity .25s, transform .25s; pointer-events:none; z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+
+  /* ---- jasa cards ---- */
+  .jasa-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  .jasa-card{border:2px solid var(--cream-2); border-radius:var(--radius); overflow:hidden; background:#fff; display:flex; flex-direction:column;}
+  .jasa-cover{height:90px; display:flex; align-items:center; justify-content:center; font-size:2rem;}
+  .jasa-body{padding:16px;}
+  .jasa-body .cat{font-size:0.75rem; font-weight:700; color:var(--coral-dark); text-transform:uppercase; letter-spacing:0.03em;}
+  .jasa-body h3{margin-top:4px;}
+  .jasa-body .meta{font-size:0.82rem; color:var(--muted); margin-top:6px;}
+  .jasa-body .price{margin-top:10px; font-weight:800; color:var(--sage-dark); font-family:'Baloo 2';}
+  .jasa-foot{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-top:1px solid var(--cream-2); margin-top:auto;}
+  .toggle{
+    display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:700; cursor:pointer; color:var(--muted);
+  }
+  .toggle .switch{width:32px; height:18px; border-radius:999px; background:var(--cream-2); position:relative; transition:background .2s;}
+  .toggle .switch::after{content:''; width:14px; height:14px; border-radius:50%; background:#fff; position:absolute; top:2px; left:2px; transition:left .2s;}
+  .toggle.on .switch{background:var(--sage);}
+  .toggle.on .switch::after{left:16px;}
+  .toggle.on{color:var(--sage-dark);}
+  .add-jasa-tile{
+    border:2px dashed var(--cream-2); border-radius:var(--radius); display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:8px; color:var(--muted); font-weight:700; cursor:pointer; min-height:190px; background:none;
+  }
+  .add-jasa-tile:hover{border-color:var(--coral); color:var(--coral-dark);}
+  .add-jasa-tile .plus{font-size:2rem; color:var(--coral);}
+
+  /* ---- orders ---- */
+  .order-card{border:2px solid var(--cream-2); border-radius:var(--radius); padding:20px; margin-bottom:16px; background:#fff;}
+  .order-top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px;}
+  .order-top .buyer{display:flex; gap:10px; align-items:center;}
+  .order-top .buyer .avatar{width:36px; height:36px; font-size:0.85rem;}
+  .order-top .buyer .name{font-weight:700; font-family:'Baloo 2'; font-size:0.95rem; color:var(--sage-dark);}
+  .order-top .buyer .sub{font-size:0.78rem; color:var(--muted);}
+  .order-track{display:flex; justify-content:space-between; position:relative; margin:16px 0 18px;}
+  .order-track::before{content:''; position:absolute; top:13px; left:16px; right:16px; height:4px; background:var(--cream-2); z-index:0;}
+  .order-track .stage{flex:1; text-align:center; position:relative; z-index:1;}
+  .order-track .stage .circle{
+    width:26px; height:26px; border-radius:50%; background:var(--cream-2); margin:0 auto 6px; border:3px solid var(--paper);
+    display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; color:#fff;
+  }
+  .order-track .stage.done .circle{background:var(--sage);}
+  .order-track .stage.current .circle{background:var(--coral);}
+  .order-track .stage span{font-size:0.7rem; color:var(--muted); font-weight:700;}
+  .order-actions{display:flex; justify-content:space-between; align-items:center;}
+  .waiting-note{font-size:0.82rem; color:var(--muted); font-style:italic;}
+
+  /* ---- chat ---- */
+  .chat-shell{display:grid; grid-template-columns:280px 1fr; border:2px solid var(--cream-2); border-radius:var(--radius); overflow:hidden; background:#fff; min-height:460px;}
+  .chat-inbox{border-right:2px solid var(--cream-2); padding:14px;}
+  .chat-inbox-item{display:flex; gap:10px; align-items:center; padding:11px; border-radius:12px; cursor:pointer; margin-bottom:4px;}
+  .chat-inbox-item:hover{background:var(--cream);}
+  .chat-inbox-item.active{background:var(--cream);}
+  .chat-inbox-item .avatar{width:36px; height:36px; font-size:0.82rem;}
+  .chat-inbox-item .txt b{display:block; font-size:0.88rem; color:var(--sage-dark); font-family:'Baloo 2';}
+  .chat-inbox-item .txt span{font-size:0.78rem; color:var(--muted);}
+  .chat-main{display:flex; flex-direction:column; padding:20px;}
+  .chat-window{flex:1; overflow-y:auto; max-height:320px; display:flex; flex-direction:column; gap:10px; padding:4px;}
+  .msg{max-width:72%; padding:10px 14px; border-radius:14px; font-size:0.9rem;}
+  .msg.them{background:var(--cream); align-self:flex-start;}
+  .msg.me{background:var(--coral); color:#fff; align-self:flex-end;}
+  .chat-input-row{display:flex; gap:8px; margin-top:14px;}
+  .chat-input-row input{flex:1; border:2px solid var(--cream-2); border-radius:12px; padding:10px 14px; font-size:0.9rem;}
+  .send-btn{background:var(--sage-dark); color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:700; cursor:pointer; font-family:'Baloo 2';}
+
+  /* verification */
+  .verify-row{display:flex; align-items:center; justify-content:space-between; padding:16px; border:2px solid var(--cream-2); border-radius:14px; margin-bottom:12px;}
+  .verify-row .lbl{font-weight:700; color:var(--sage-dark); font-family:'Baloo 2';}
+  .verify-row .desc{font-size:0.82rem; color:var(--muted); margin-top:2px;}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;}
+
+    .hamburger{display:inline-flex; align-items:center; justify-content:center;}
+
+    .sidebar{
+      position:fixed; top:0; left:0; height:100vh; width:250px; max-width:82vw;
+      transform:translateX(-100%); transition:transform .25s ease; z-index:100;
+      overflow-y:auto; box-shadow:8px 0 24px rgba(0,0,0,0.18);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-close{
+      display:inline-flex; align-items:center; justify-content:center; margin-left:auto;
+      background:none; border:none; color:#f4efd9; font-size:1.3rem; cursor:pointer; padding:4px 8px;
+    }
+    .sidebar-foot{display:block;}
+
+    .topbar{padding:16px 18px;}
+    .topbar .who small{display:none;}
+
+    .stat-grid{grid-template-columns:1fr 1fr;}
+    .form-grid{grid-template-columns:1fr;}
+    .jasa-grid{grid-template-columns:1fr 1fr;}
+    .chat-shell{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:520px){
+    .stat-grid{grid-template-columns:1fr 1fr; gap:12px;}
+    .jasa-grid{grid-template-columns:1fr;}
+    main{padding:20px 16px 50px;}
+    .topbar{padding:14px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="dot"></span>Freelance UPNVJ
+      <button class="sidebar-close" id="sidebarCloseBtn" aria-label="Tutup menu">✕</button>
+    </div>
+    <button class="nav-item active" data-view="dashboard"><span class="ic">🏠</span>Dashboard</button>
+    <button class="nav-item" data-view="profil"><span class="ic">🙋</span>Profil Saya</button>
+    <button class="nav-item" data-view="jasa"><span class="ic">🧰</span>Jasa Saya</button>
+    <button class="nav-item" data-view="pesanan"><span class="ic">📦</span>Pesanan Masuk</button>
+    <button class="nav-item" data-view="chat"><span class="ic">💬</span>Chat</button>
+    <button class="nav-item" data-view="verifikasi"><span class="ic">🛡️</span>Verifikasi Akun</button>
+    <div class="sidebar-foot"><b>Mode Seller</b>Ini tampilan mahasiswa yang menawarkan jasa. Ganti peran ke Buyer di halaman utama.</div>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <div class="title-wrap">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Buka menu">☰</button>
+        <div>
+          <h2 id="topTitle">Dashboard</h2>
+          <span class="hint" id="topSub">Ringkasan aktivitas jasamu hari ini.</span>
+        </div>
+      </div>
+      <div class="who">
+        <span class="badge-pill verified" id="emailBadge">✓ @upnvj.ac.id</span>
+        <div class="avatar">DA</div>
+        <div>
+          <b style="font-family:'Baloo 2'; font-size:0.9rem;">Muhammad Rifky Al Madinah</b>
+          <small>Fakultas Ilmu Komputer</small>
+        </div>
+      </div>
+    </div>
+
+    <main>
+
+      <!-- DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <div class="stat-grid">
+          <div class="stat"><div class="ic">💰</div><b>Rp540.000</b><span>Total pendapatan</span></div>
+          <div class="stat"><div class="ic">📦</div><b id="statActiveOrders">2</b><span>Pesanan aktif</span></div>
+          <div class="stat"><div class="ic">⭐</div><b>4.9</b><span>Rating rata-rata</span></div>
+          <div class="stat"><div class="ic">🧰</div><b id="statActiveJasa">3</b><span>Jasa aktif</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Kelengkapan profil</h3><span class="hint" id="completePct">75%</span></div>
+          <div class="progress-row"><div class="progress-track"><div class="progress-fill" id="completeBar" style="width:75%"></div></div></div>
+          <ul class="todo-list">
+            <li class="done"><span class="chk">✓</span>Email kampus terverifikasi</li>
+            <li class="done"><span class="chk">✓</span>Minimal 1 jasa aktif</li>
+            <li id="todoBadge"><span class="chk"></span>Verifikasi skill badge</li>
+            <li class="done"><span class="chk">✓</span>Bio profil terisi</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Aktivitas terbaru</h3></div>
+          <ul class="todo-list">
+            <li class="done"><span class="chk">🔔</span>Uwais Ahmad Karim. memesan jasa "Website Portofolio"</li>
+            <li class="done"><span class="chk">🔔</span>Review baru ⭐5 dari Bagus D.</li>
+            <li class="done"><span class="chk">🔔</span>Pesanan "Website Portofolio" ditandai selesai</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PROFIL -->
+      <div class="view" id="view-profil">
+        <div class="card">
+          <div class="card-head"><h3>Informasi Profil</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Nama lengkap</label><input type="text" value="Muhammad Rifky Al Madinah"></div>
+            <div class="field"><label>Fakultas</label>
+              <select>
+                <option>Ilmu Komputer</option><option>FISIP</option><option>Teknik</option><option>Ekonomi & Bisnis</option><option>Hukum</option>
+              </select>
+            </div>
+            <div class="field"><label>Program studi</label><input type="text" value="S1 Sistem Informasi"></div>
+            <div class="field"><label>Email kampus</label><input type="text" value="MuhammadRifky.AlMadinah@upnvj.ac.id" disabled></div>
+            <div class="field full"><label>Bio singkat</label><textarea>Web Developer dengan pengalaman 3 Tahun, menggunakan HTML, CSS, dan JavaScript.</textarea></div>
+            <div class="field full">
+              <label>Skill</label>
+              <div class="skills-input" id="skillsInput">
+                <span class="skill-chip">Figma<button data-skill="Figma">×</button></span>
+                <span class="skill-chip">Web Design<button data-skill="Web Design">×</button></span>
+                <span class="skill-chip">Laravel<button data-skill="Laravel">×</button></span>
+                <input type="text" id="skillTyper" placeholder="Tambah skill, tekan Enter...">
+              </div>
+              <span class="hint">Skill ini dipakai buyer untuk menemukan jasamu lewat filter fakultas & kategori.</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveProfileBtn">Simpan Profil</button>
+        </div>
+      </div>
+
+      <!-- JASA -->
+      <div class="view" id="view-jasa">
+        <div class="card">
+          <div class="card-head"><h3>Jasa yang kamu tawarkan</h3></div>
+          <div class="jasa-grid" id="jasaGrid"></div>
+        </div>
+
+        <div class="card" id="jasaFormCard" style="display:none;">
+          <div class="card-head"><h3>Tambah Jasa Baru</h3><button class="btn-danger-ghost" id="cancelJasaBtn">Batal</button></div>
+          <div class="form-grid">
+            <div class="field full"><label>Judul jasa</label><input type="text" id="jasaTitle" placeholder="contoh: Desain Feed Instagram 3 Slide"></div>
+            <div class="field"><label>Kategori</label>
+              <select id="jasaCategory">
+                <option>Desain</option><option>Video Editor</option><option>Web Dev</option><option>Fotografer</option><option>Penulisan</option>
+              </select>
+            </div>
+            <div class="field"><label>Harga (Rp)</label><input type="number" id="jasaPrice" placeholder="75000"></div>
+            <div class="field"><label>Estimasi pengerjaan</label><input type="text" id="jasaDelivery" placeholder="contoh: 2 hari"></div>
+            <div class="field"><label>Icon sampul</label>
+              <select id="jasaIcon"><option value="🎨">🎨 Desain</option><option value="🎬">🎬 Video</option><option value="💻">💻 Web</option><option value="📷">📷 Foto</option><option value="✍️">✍️ Tulisan</option></select>
+            </div>
+            <div class="field full"><label>Deskripsi</label><textarea id="jasaDesc" placeholder="Jelaskan apa yang buyer dapat dari jasa ini..."></textarea></div>
+          </div>
+          <button class="btn btn-primary" id="submitJasaBtn">Simpan Jasa</button>
+        </div>
+      </div>
+
+      <!-- PESANAN -->
+      <div class="view" id="view-pesanan">
+        <div class="card">
+          <div class="card-head"><h3>Pesanan masuk</h3></div>
+          <div id="ordersList"></div>
+        </div>
+      </div>
+
+      <!-- CHAT -->
+      <div class="view" id="view-chat">
+        <div class="card" style="padding:0;">
+          <div class="chat-shell">
+            <div class="chat-inbox" id="chatInbox"></div>
+            <div class="chat-main" id="chatMain"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VERIFIKASI -->
+      <div class="view" id="view-verifikasi">
+        <div class="card">
+          <div class="card-head"><h3>Verifikasi Email Kampus</h3></div>
+          <div class="verify-row">
+            <div><div class="lbl">MuhammadRifky.AlMadinah@upnvj.ac.id</div><div class="desc">Akun seller dibatasi khusus domain @upnvj.ac.id.</div></div>
+            <span class="badge-pill verified">✓ Terverifikasi</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Verifikasi Skill Badge</h3></div>
+          <p class="hint" style="display:block; margin-bottom:14px;">Upload sertifikat atau portofolio untuk memvalidasi skill-mu ke buyer. Ini contoh simulasi proses review.</p>
+          <div class="form-grid">
+            <div class="field"><label>Pilih skill</label>
+              <select id="badgeSkill"><option>Web Developer</option><option>UI/UX Designer</option><option>Video Editor</option></select>
+            </div>
+            <div class="field"><label>Upload dokumen</label><input type="file" id="badgeFile"></div>
+          </div>
+          <button class="btn btn-primary" id="submitBadgeBtn">Ajukan Verifikasi</button>
+          <div id="badgeList" style="margin-top:18px; display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ---------- mobile sidebar (hamburger) ---------- */
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
+  function openSidebar(){
+    sidebar.classList.add('open');
+    sidebarOverlay.classList.add('show');
+  }
+  function closeSidebar(){
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('show');
+  }
+  hamburgerBtn.addEventListener('click', ()=>{
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  sidebarCloseBtn.addEventListener('click', closeSidebar);
+  sidebarOverlay.addEventListener('click', closeSidebar);
+  window.addEventListener('resize', ()=>{
+    if(window.innerWidth > 900) closeSidebar();
+  });
+
+  /* ---------- navigation ---------- */
+  const navItems = [...document.querySelectorAll('.nav-item')];
+  const views = [...document.querySelectorAll('.view')];
+  const titles = {
+    dashboard:["Dashboard","Ringkasan aktivitas jasamu hari ini."],
+    profil:["Profil Saya","Informasi ini akan dilihat buyer di halaman jasamu."],
+    jasa:["Jasa Saya","Kelola daftar jasa yang kamu tawarkan ke buyer."],
+    pesanan:["Pesanan Masuk","Pantau progres pesanan dari buyer."],
+    chat:["Chat","Obrolan dengan buyer yang tertarik jasamu."],
+    verifikasi:["Verifikasi Akun","Tingkatkan kepercayaan buyer dengan verifikasi."]
+  };
+  navItems.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      navItems.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const v = btn.dataset.view;
+      views.forEach(x=>x.classList.remove('active'));
+      document.getElementById('view-'+v).classList.add('active');
+      document.getElementById('topTitle').textContent = titles[v][0];
+      document.getElementById('topSub').textContent = titles[v][1];
+      closeSidebar();
+    });
+  });
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._tid);
+    showToast._tid = setTimeout(()=> t.classList.remove('show'), 2400);
+  }
+
+  /* ---------- skills chips ---------- */
+  const skillsInput = document.getElementById('skillsInput');
+  const skillTyper = document.getElementById('skillTyper');
+  skillsInput.addEventListener('click', (e)=>{
+    if(e.target.tagName==='BUTTON'){
+      e.target.closest('.skill-chip').remove();
+    }
+  });
+  skillTyper.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' && skillTyper.value.trim()){
+      e.preventDefault();
+      const chip = document.createElement('span');
+      chip.className='skill-chip';
+      chip.innerHTML = `${escapeHtml(skillTyper.value.trim())}<button>×</button>`;
+      skillsInput.insertBefore(chip, skillTyper);
+      skillTyper.value='';
+    }
+  });
+  document.getElementById('saveProfileBtn').addEventListener('click', ()=> showToast('✓ Profil berhasil disimpan'));
+
+  /* ---------- jasa (services) ---------- */
+  let jasaList = [
+    {icon:'🎨', title:'Pembuatan Website', category:'Web Dev', price:600000, delivery:'1-2 Minggu', active:true},
+    {icon:'🎨', title:'Desain Website', category:'Desain', price:200000, delivery:'1 Minggu', active:true},
+    {icon:'✍️', title:'Pembuatan Website Portofolio', category:'Desain', price:300000, delivery:'1 Minggu', active:true},
+  ];
+  const jasaGrid = document.getElementById('jasaGrid');
+  const coverColors = {'Desain':'#f3ddd3','Video Editor':'#dbe6d3','Web Dev':'#e6dcc9','Fotografer':'#d7e3ee','Penulisan':'#eee3cf'};
+
+  function renderJasa(){
+    jasaGrid.innerHTML = '';
+    jasaList.forEach((j,i)=>{
+      const card = document.createElement('div');
+      card.className='jasa-card';
+      card.innerHTML = `
+        <div class="jasa-cover" style="background:${coverColors[j.category]||'#eee'}">${j.icon}</div>
+        <div class="jasa-body">
+          <div class="cat">${j.category}</div>
+          <h3>${escapeHtml(j.title)}</h3>
+          <div class="meta">⏱ ${escapeHtml(j.delivery)} pengerjaan</div>
+          <div class="price">Rp${j.price.toLocaleString('id-ID')}</div>
+        </div>
+        <div class="jasa-foot">
+          <span class="toggle ${j.active?'on':''}" data-i="${i}"><span class="switch"></span>${j.active?'Aktif':'Nonaktif'}</span>
+          <button class="btn-danger-ghost" data-del="${i}">Hapus</button>
+        </div>`;
+      jasaGrid.appendChild(card);
+    });
+    const addTile = document.createElement('button');
+    addTile.className='add-jasa-tile';
+    addTile.type='button';
+    addTile.innerHTML = `<span class="plus">+</span>Tambah Jasa Baru`;
+    addTile.addEventListener('click', ()=>{
+      document.getElementById('jasaFormCard').style.display='block';
+      document.getElementById('jasaFormCard').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+    jasaGrid.appendChild(addTile);
+
+    [...jasaGrid.querySelectorAll('.toggle')].forEach(t=>{
+      t.addEventListener('click', ()=>{
+        const i = parseInt(t.dataset.i);
+        jasaList[i].active = !jasaList[i].active;
+        renderJasa(); updateStats();
+      });
+    });
+    [...jasaGrid.querySelectorAll('[data-del]')].forEach(b=>{
+      b.addEventListener('click', ()=>{
+        jasaList.splice(parseInt(b.dataset.del),1);
+        renderJasa(); updateStats();
+        showToast('Jasa dihapus');
+      });
+    });
+  }
+  renderJasa();
+
+  document.getElementById('cancelJasaBtn').addEventListener('click', ()=>{
+    document.getElementById('jasaFormCard').style.display='none';
+  });
+  document.getElementById('submitJasaBtn').addEventListener('click', ()=>{
+    const title = document.getElementById('jasaTitle').value.trim();
+    const price = parseInt(document.getElementById('jasaPrice').value);
+    const delivery = document.getElementById('jasaDelivery').value.trim();
+    const desc = document.getElementById('jasaDesc').value.trim();
+    if(!title || !price || !delivery || !desc){
+      showToast('Lengkapi semua kolom dulu ya');
+      return;
+    }
+    jasaList.push({
+      icon: document.getElementById('jasaIcon').value,
+      title, category: document.getElementById('jasaCategory').value,
+      price, delivery, active:true
+    });
+    ['jasaTitle','jasaPrice','jasaDelivery','jasaDesc'].forEach(id=> document.getElementById(id).value='');
+    document.getElementById('jasaFormCard').style.display='none';
+    renderJasa(); updateStats();
+    showToast('✓ Jasa baru ditambahkan');
+  });
+
+  function updateStats(){
+    document.getElementById('statActiveJasa').textContent = jasaList.filter(j=>j.active).length;
+  }
+
+  /* ---------- orders ---------- */
+  const STAGES = ["Diterima","Dikerjakan","Dikirim","Selesai"];
+  let orders = [
+    {id:1, buyer:'Risky Alfariansyah Salim', color:'#a9c4dd', jasa:'Website Portofolio', price:250000, deadline:'20 Sep', stage:1},
+    {id:2, buyer:'Syafira Mardia Ramadhani', color:'#e3b23c', jasa:'Desain Website', price:200000, deadline:'5 Oct', stage:0},
+    {id:3, buyer:'Clara Adinda Mustika', color:'#5c6e4f', jasa:'Pembuatan Website UMKM', price:600000, deadline:'30 Oct', stage:3},
+  ];
+  const ordersList = document.getElementById('ordersList');
+  function orderInitials(name){ return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+  function renderOrders(){
+    ordersList.innerHTML = '';
+    orders.forEach((o, idx)=>{
+      const el = document.createElement('div');
+      el.className='order-card';
+      const nextLabel = ["Terima Pesanan","Mulai Kerjakan","Kirim Hasil"][o.stage];
+      el.innerHTML = `
+        <div class="order-top">
+          <div class="buyer">
+            <div class="avatar" style="background:${o.color}">${orderInitials(o.buyer)}</div>
+            <div><div class="name">${escapeHtml(o.buyer)}</div><div class="sub">${escapeHtml(o.jasa)} · Rp${o.price.toLocaleString('id-ID')} · deadline ${o.deadline}</div></div>
+          </div>
+          <button class="btn btn-outline btn-sm" data-chat="${escapeHtml(o.buyer)}">💬 Chat</button>
+        </div>
+        <div class="order-track">
+          ${STAGES.map((s,i)=>`
+            <div class="stage ${i<o.stage?'done':i===o.stage?'current':''}">
+              <div class="circle">${i<o.stage?'✓':i+1}</div><span>${s}</span>
+            </div>`).join('')}
+        </div>
+        <div class="order-actions">
+          ${o.stage < 3
+            ? `<button class="btn btn-primary btn-sm" data-advance="${idx}">${nextLabel} →</button>`
+            : `<span class="waiting-note">🎉 Pesanan selesai & dibayar</span>`}
+        </div>`;
+      ordersList.appendChild(el);
+    });
+    [...ordersList.querySelectorAll('[data-advance]')].forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const i = parseInt(b.dataset.advance);
+        orders[i].stage = Math.min(orders[i].stage+1, 3);
+        renderOrders(); updateOrderStat();
+        showToast('Status pesanan diperbarui');
+      });
+    });
+    [...ordersList.querySelectorAll('[data-chat]')].forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelector('.nav-item[data-view="chat"]').click();
+        selectChat(b.dataset.chat);
+      });
+    });
+  }
+  function updateOrderStat(){
+    document.getElementById('statActiveOrders').textContent = orders.filter(o=>o.stage<3).length;
+  }
+  renderOrders(); updateOrderStat();
+
+  /* ---------- chat ---------- */
+  const conversations = {
+    'Risky Alfariansyah Salim': {color:'#a9c4dd', messages:[{who:'them', text:'Halo, Websitenya bisa pakai tema pastel nggak?'}]},
+    'Syafira Mardia Ramadhani': {color:'#e3b23c', messages:[{who:'them', text:'Desain websitenya jadi kapan ya kak?'}]},
+    'Clara Adinda Mustika': {color:'#5c6e4f', messages:[{who:'them', text:'Makasih ya, hasilnya bagus banget!'}]},
+  };
+  let activeChat = Object.keys(conversations)[0];
+  const chatInbox = document.getElementById('chatInbox');
+  const chatMain = document.getElementById('chatMain');
+
+  function renderInbox(){
+    chatInbox.innerHTML = '';
+    Object.keys(conversations).forEach(name=>{
+      const c = conversations[name];
+      const last = c.messages[c.messages.length-1];
+      const item = document.createElement('div');
+      item.className = 'chat-inbox-item' + (name===activeChat?' active':'');
+      item.innerHTML = `<div class="avatar" style="background:${c.color}">${orderInitials(name)}</div>
+        <div class="txt"><b>${escapeHtml(name)}</b><span>${escapeHtml(last.text.slice(0,28))}${last.text.length>28?'…':''}</span></div>`;
+      item.addEventListener('click', ()=> selectChat(name));
+      chatInbox.appendChild(item);
+    });
+  }
+  function selectChat(name){
+    activeChat = name;
+    renderInbox();
+    renderChatMain();
+  }
+  function renderChatMain(){
+    const c = conversations[activeChat];
+    chatMain.innerHTML = `
+      <h3 style="margin-bottom:14px;">${escapeHtml(activeChat)}</h3>
+      <div class="chat-window" id="chatWin"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInp" placeholder="Balas ${escapeHtml(activeChat.split(' ')[0])}...">
+        <button class="send-btn" id="chatSend">Kirim</button>
+      </div>`;
+    const win = document.getElementById('chatWin');
+    function paint(){
+      win.innerHTML = c.messages.map(m=>`<div class="msg ${m.who==='me'?'me':'them'}">${escapeHtml(m.text)}</div>`).join('');
+      win.scrollTop = win.scrollHeight;
+    }
+    paint();
+    const inp = document.getElementById('chatInp');
+    const send = ()=>{
+      const v = inp.value.trim();
+      if(!v) return;
+      c.messages.push({who:'me', text:v});
+      inp.value=''; paint(); renderInbox();
+      setTimeout(()=>{
+        const replies = ["Oke siap, ditunggu ya kak 🙏","Baik, terima kasih infonya!","Boleh, nggak masalah kok.","Wah keren, makasih banyak!"];
+        c.messages.push({who:'them', text: replies[Math.floor(Math.random()*replies.length)]});
+        paint(); renderInbox();
+      }, 700);
+    };
+    document.getElementById('chatSend').addEventListener('click', send);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+  }
+  renderInbox(); renderChatMain();
+
+  /* ---------- skill badge verification ---------- */
+  let badges = [];
+  document.getElementById('submitBadgeBtn').addEventListener('click', ()=>{
+    const skill = document.getElementById('badgeSkill').value;
+    const fileInput = document.getElementById('badgeFile');
+    const fileName = fileInput.files[0] ? fileInput.files[0].name : 'dokumen.pdf';
+    const entry = {skill, fileName, status:'pending'};
+    badges.push(entry);
+    renderBadges();
+    fileInput.value='';
+    showToast('Pengajuan verifikasi dikirim');
+    setTimeout(()=>{
+      entry.status='verified';
+      renderBadges();
+      document.getElementById('todoBadge').classList.add('done');
+      document.getElementById('todoBadge').querySelector('.chk').textContent='✓';
+      document.getElementById('completeBar').style.width='100%';
+      document.getElementById('completePct').textContent='100%';
+      showToast(`✓ Skill "${skill}" terverifikasi!`);
+    }, 2200);
+  });
+  function renderBadges(){
+    document.getElementById('badgeList').innerHTML = badges.map(b=>`
+      <div class="verify-row">
+        <div><div class="lbl">${escapeHtml(b.skill)}</div><div class="desc">${escapeHtml(b.fileName)}</div></div>
+        <span class="badge-pill ${b.status==='verified'?'verified':'pending'}">${b.status==='verified' ? '✓ Terverifikasi' : '⏳ Menunggu review'}</span>
+      </div>`).join('');
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+</script>
+</body>
+</html>
